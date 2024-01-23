@@ -29,7 +29,7 @@ const AddContact = () => {
       })
       .then(() => {
         console.log('contact saved');
-        navigation.goBack();
+        navigation.pop()
       })
       .catch(err => {
         console.log(err);

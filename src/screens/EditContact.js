@@ -9,47 +9,136 @@ import {
 import React, {useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
 const EditContact = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [name, setName] = useState(route.params.data.name);
   const [email, setEmail] = useState(route.params.data.email);
   const [mobile, setMobile] = useState(route.params.data.mobile);
-  console.log(route.params.data.id);
+  const [imageData, setImageData] = useState(null);
+  const [imageUrl, setImageUrl] = useState(
+    route.params.data.image ? route.params.data.image : '',
+  );
+
   //post
   //get
   //update
   //delete
 
-  const saveContact = () => {
-    firestore()
-      .collection('contacts')
-      .doc(route.params.data.id)
-      .update({
-        name: name,
-        mobile: mobile,
-        email: email,
-      })
-      .then(() => {
-        console.log('contact saved');
-        navigation.goBack();
-      })
-      .catch(err => {
-        console.log(err);
-      });
+  const saveContact = async () => {
+    let image = '';
+    if (imageData != null) {
+      const reference = storage().ref(imageData.assets[0].fileName);
+      const pathToFile = imageData.assets[0].uri;
+      // uploads file
+      const task = await reference.putFile(pathToFile);
+      // task.on('state_changed', taskSnapshot => {
+      //   console.log(
+      //     `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+      //   );
+      // });
+      const url = await storage()
+        .ref(imageData.assets[0].fileName)
+        .getDownloadURL();
+      console.log(url);
+
+      firestore()
+        .collection('contacts')
+        .doc(route.params.data.id)
+        .update({
+          name: name,
+          mobile: mobile,
+          email: email,
+          image: url,
+        })
+        .then(() => {
+          console.log('contact saved');
+          navigation.goBack();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+      // task.then(async () => {
+      //   console.log('Image uploaded to the bucket!');
+      //   const url = await storage()
+      //     .ref(imageData.assets[0].fileName)
+      //     .getDownloadURL();
+      //   firestore()
+      //     .collection('contacts')
+      //     .doc(route.params.data.id)
+      //     .update({
+      //       name: name,
+      //       mobile: mobile,
+      //       email: email,
+      //       image: url,
+      //     })
+      //     .then(() => {
+      //       console.log('contact saved');
+      //       navigation.goBack();
+      //     })
+      //     .catch(err => {
+      //       console.log(err);
+      //     });
+      // });
+    } else {
+      firestore()
+        .collection('contacts')
+        .doc(route.params.data.id)
+        .update({
+          name: name,
+          mobile: mobile,
+          email: email,
+        })
+        .then(() => {
+          console.log('contact saved');
+          navigation.goBack();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
+
+  const openCamera = async () => {
+    const res = await launchCamera({mediaType: 'photo'});
+    if (!res.didCancel) {
+      setImageData(res);
+      setImageUrl(res.assets[0].uri);
+    }
+  };
+  const openGallery = async () => {
+    const res = await launchImageLibrary({mediaType: 'photo'});
+    if (!res.didCancel) {
+      setImageData(res);
+      setImageUrl(res.assets[0].uri);
+      // uploadImage(res);
+    }
   };
 
   return (
     <View style={{flex: 1}}>
       <TouchableOpacity style={{alignSelf: 'center', marginTop: 50}}>
-        <Image
-          source={require('../images/user.png')}
-          style={{
-            width: 80,
-            height: 80,
-            borderBottomLeftRadius: 40,
-          }}
-        />
+        {imageData != null || imageUrl != '' ? (
+          <Image
+            source={{uri: imageUrl}}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+            }}
+          />
+        ) : (
+          <Image
+            source={require('../images/user.png')}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+            }}
+          />
+        )}
       </TouchableOpacity>
       <Text
         style={{
@@ -58,6 +147,9 @@ const EditContact = () => {
           color: 'blue',
           marginTop: 10,
           fontSize: 16,
+        }}
+        onPress={() => {
+          openGallery();
         }}>
         Edit Image
       </Text>

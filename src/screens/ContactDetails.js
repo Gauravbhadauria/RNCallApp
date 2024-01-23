@@ -40,17 +40,29 @@ const AddContact = () => {
         console.log(err);
       });
   };
+
   return (
     <View style={{flex: 1}}>
       <TouchableOpacity style={{alignSelf: 'center', marginTop: 50}}>
-        <Image
-          source={require('../images/user.png')}
-          style={{
-            width: 80,
-            height: 80,
-            borderBottomLeftRadius: 40,
-          }}
-        />
+        {userInfo != null && userInfo.image ? (
+          <Image
+            source={{uri: userInfo.image}}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+            }}
+          />
+        ) : (
+          <Image
+            source={require('../images/user.png')}
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+            }}
+          />
+        )}
       </TouchableOpacity>
 
       <Text
@@ -74,8 +86,7 @@ const AddContact = () => {
         }}>
         <Text style={{fontSize: 20}}>{'Contact:'}</Text>
         <Text style={{fontSize: 20, fontWeight: '500'}}>
-         
-        {userInfo ? userInfo.mobile : ''}
+          {userInfo ? userInfo.mobile : ''}
         </Text>
       </View>
       <View
@@ -89,7 +100,6 @@ const AddContact = () => {
         }}>
         <Text style={{fontSize: 20}}>{'Email:'}</Text>
         <Text style={{fontSize: 20, fontWeight: '500'}}>
-       
           {userInfo ? userInfo.email : ''}
         </Text>
       </View>

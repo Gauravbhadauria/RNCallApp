@@ -55,10 +55,25 @@ const Contacts = () => {
                 });
               }}>
               <View style={{flexDirection: 'row'}}>
-                <Image
-                  source={require('../images/user.png')}
-                  style={{width: 50, height: 50, borderRadius: 25}}
-                />
+                {item.image ? (
+                  <Image
+                    source={{uri: item.image}}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                    }}
+                  />
+                ) : (
+                  <Image
+                    source={require('../images/user.png')}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                    }}
+                  />
+                )}
                 <View style={{marginLeft: 15}}>
                   <Text style={{fontSize: 18, fontWeight: '600'}}>
                     {item.name}
